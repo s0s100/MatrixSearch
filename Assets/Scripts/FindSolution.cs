@@ -5,10 +5,7 @@ public class FindSolution : MonoBehaviour
 {
     [Inject] private readonly JSONReaderService jsonReaderService;
     [Inject] private readonly JSONMatrixFillService matrixFillService;
-
-    [SerializeField] private string modelsPath = "model";
-    [SerializeField] private string spacePath = "space";
-    [SerializeField] private GameObject visualizationObject;
+    [Inject] private readonly ConfigProvider configProvider;
 
     private void Start()
     {
@@ -17,12 +14,13 @@ public class FindSolution : MonoBehaviour
 
     private void Solve()
     {
-        var modelText = jsonReaderService.ReadJSON(modelsPath);
-        var spaceText = jsonReaderService.ReadJSON(spacePath);
+        var modelText = jsonReaderService.ReadJSON(configProvider.ModelsPath);
+        var spaceText = jsonReaderService.ReadJSON(configProvider.SpacePath);
 
         var modelData = matrixFillService.GetMatricesFromJSON(modelText);
         var spaceData = matrixFillService.GetMatricesFromJSON(spaceText);
 
-        modelData.VisualizeOnScene(visualizationObject, transform);
+        modelData.VisualizeOnSceneAsModel(configProvider);
+        spaceData.VisualizeOnSceneAsSpace(configProvider);
     }
 }

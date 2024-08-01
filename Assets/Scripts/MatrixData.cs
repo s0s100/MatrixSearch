@@ -1,5 +1,4 @@
-using System;
-using Unity.VisualScripting;
+﻿using System;
 using UnityEngine;
 
 [Serializable]
@@ -22,33 +21,46 @@ public struct Matrix4x4Data
 }
 
 [Serializable]
-public struct MatrixData
+public class MatrixData
 {
+
     [SerializeField] public Matrix4x4Data[] matrices;
 
-    public void VisualizeOnScene(GameObject visualizationObject, Transform parent)
+    // Implement intefaces to inherit for model and space matrices
+    public void VisualizeOnSceneAsModel(ConfigProvider configProvider)
     {
         foreach (var mat in matrices)
         {
             var matrix = mat.ToMatrix4x4();
-            var newObject = GenerateObjectFromMatrix(matrix, visualizationObject, parent);
+            var newObject = GenerateObjectFromMatrix(matrix, configProvider);
+            newObject.transform.parent = configProvider.ModelParentTransform;
+            newObject.GetComponent<MeshRenderer>().material = configProvider.SelectedMaterial;
         }   
     }
 
+    public void VisualizeOnSceneAsSpace(ConfigProvider configProvider)
+    {
+        foreach (var mat in matrices)
+        {
+            var matrix = mat.ToMatrix4x4();
+            var newObject = GenerateObjectFromMatrix(matrix, configProvider);
+            newObject.transform.parent = configProvider.SpaceParentTransform;
+            newObject.GetComponent<MeshRenderer>().material = configProvider.DefaultMaterial;
+        }
+    }
+
     private GameObject GenerateObjectFromMatrix(Matrix4x4 matrix, 
-        GameObject visualizationObject, Transform parent)
+        ConfigProvider configProvider)
     {
         var position = matrix.GetColumn(3);
-        var rotation = Quaternion.LookRotation(matrix.GetColumn(2), matrix.GetColumn(1));
+        var rotation = Quaternion.LookRotation(matrix.GetColumn(2), 
+            matrix.GetColumn(1));
         var scale = new Vector3(matrix.GetColumn(0).magnitude,
             matrix.GetColumn(1).magnitude, matrix.GetColumn(2).magnitude);
-        //newTransform.SetPositionAndRotation(position, rotation);
-        //newTransform.localScale = scale;
 
-        var newObject = GameObject.Instantiate(visualizationObject);
+        var newObject = GameObject.Instantiate(configProvider.VisualObject);
         newObject.transform.SetPositionAndRotation(position, rotation);
         newObject.transform.localScale = scale;
-        newObject.transform.parent = parent;
 
         return newObject;
     }
