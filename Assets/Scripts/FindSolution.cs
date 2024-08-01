@@ -4,6 +4,7 @@ using Zenject;
 public class FindSolution : MonoBehaviour
 {
     [Inject] private readonly JSONReaderService jsonReaderService;
+    [Inject] private readonly JSONMatrixFillService matrixFillService;
 
     [SerializeField] private string modelsPath = "model";
     [SerializeField] private string spacePath = "space";
@@ -17,7 +18,10 @@ public class FindSolution : MonoBehaviour
     {
         var modelText = jsonReaderService.ReadJSON(modelsPath);
         var spaceText = jsonReaderService.ReadJSON(spacePath);
-        Debug.Log(modelText);
-        Debug.Log(spaceText);
+
+        var modelData = matrixFillService.GetMatricesFromJSON(modelText);
+        var spaceData = matrixFillService.GetMatricesFromJSON(spaceText);
+
+
     }
 }
