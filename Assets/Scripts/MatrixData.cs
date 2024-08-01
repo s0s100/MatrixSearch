@@ -23,7 +23,6 @@ public struct Matrix4x4Data
 [Serializable]
 public class MatrixData
 {
-
     [SerializeField] public Matrix4x4Data[] matrices;
 
     // Implement intefaces to inherit for model and space matrices
