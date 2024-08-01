@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using Zenject;
 
 public class FindSolution : MonoBehaviour
@@ -13,8 +14,12 @@ public class FindSolution : MonoBehaviour
     private void Start()
     {
         ReadJSONData();
-        var result = Solve();
-        GenerateJSONData(result);
+        StartCoroutine(UpdateEverySecond(returnValue =>
+        {
+            GenerateJSONData(returnValue);
+        }));
+        //var result = Solve();
+        //GenerateJSONData(result);
     }
 
     private void ReadJSONData()
@@ -29,29 +34,26 @@ public class FindSolution : MonoBehaviour
         spaceData.VisualizeOnSceneAsSpace(configProvider);
     }
 
-    // Отталкиваясь от первого элемента массива буду искать
-    private MatrixData Solve()
+    private IEnumerator UpdateEverySecond(System.Action<MatrixData> callback = null)
     {
+        MatrixData result = modelData;
         var firstModelMatrix = modelData.matrices[0].ToMatrix4x4();
         var firstModelMatrixI = firstModelMatrix.inverse;
-        //for (int i = 0; i < spaceData.matrices.Length; i++)
-        //{
-        //    var curSpaceMatrix = spaceData.matrices[i].ToMatrix4x4();
-        //    var transformationMatrix = curSpaceMatrix * firstModelMatrixI;
-        //    var modelMatrix = configProvider.ModelParentTransform.localToWorldMatrix;
-        //    var resultMatrix = modelMatrix * transformationMatrix;
-        //    UpdateTransform(configProvider.ModelParentTransform,
-        //        resultMatrix);
-        //}
 
-        var curSpaceMatrix = spaceData.matrices[0].ToMatrix4x4();
-        var transformationMatrix = curSpaceMatrix * firstModelMatrixI;
-        var modelMatrix = configProvider.ModelParentTransform.localToWorldMatrix;
-        var resultMatrix = modelMatrix * transformationMatrix;
-        UpdateTransform(configProvider.ModelParentTransform,
-            resultMatrix);
+        for (int i = 0; i < spaceData.matrices.Length; i++)
+        {
+            var curSpaceMatrix = spaceData.matrices[i].ToMatrix4x4();
+            var transformationMatrix = curSpaceMatrix * firstModelMatrixI;
+            var modelMatrix = configProvider.ModelParentTransform.localToWorldMatrix;
+            var resultMatrix = transformationMatrix;
+            UpdateTransform(configProvider.ModelParentTransform,
+                resultMatrix);
 
-        return modelData;
+            // Wait for 1 second if found required solution
+            yield return new WaitForSeconds(1);
+        }
+
+        callback.Invoke(result);
     }
 
     private void UpdateTransform(Transform targetTransform, Matrix4x4 matrix)
