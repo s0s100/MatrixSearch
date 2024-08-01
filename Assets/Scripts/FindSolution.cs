@@ -8,6 +8,7 @@ public class FindSolution : MonoBehaviour
 
     [SerializeField] private string modelsPath = "model";
     [SerializeField] private string spacePath = "space";
+    [SerializeField] private GameObject visualizationObject;
 
     private void Start()
     {
@@ -22,6 +23,6 @@ public class FindSolution : MonoBehaviour
         var modelData = matrixFillService.GetMatricesFromJSON(modelText);
         var spaceData = matrixFillService.GetMatricesFromJSON(spaceText);
 
-
+        modelData.VisualizeOnScene(visualizationObject, transform);
     }
 }

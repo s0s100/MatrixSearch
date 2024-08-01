@@ -152,6 +152,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f8243317fb28004da4eadb30d242938, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  modelsPath: model
+  spacePath: space
+  visualizationObject: {fileID: 7384531709330225795, guid: 018e26cd622ff28499ad89f590ae0311, type: 3}
 --- !u!4 &126155768
 Transform:
   m_ObjectHideFlags: 0
