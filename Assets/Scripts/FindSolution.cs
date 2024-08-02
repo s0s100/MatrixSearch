@@ -8,49 +8,65 @@ public class FindSolution : MonoBehaviour
     [Inject] private readonly JSONMatrixFillService matrixFillService;
     [Inject] private readonly ConfigProvider configProvider;
 
-    private MatrixData modelData;
-    private MatrixData spaceData;
+    private MatrixData _modelData;
+    private MatrixData _spaceData;
 
     private void Start()
     {
-        ReadJSONData();
+        ReadAndVisualizeData();
         StartCoroutine(UpdateEverySecond(returnValue =>
         {
-            GenerateJSONData(returnValue);
+            GenerateData(returnValue);
         }));
-        //var result = Solve();
-        //GenerateJSONData(result);
     }
 
-    private void ReadJSONData()
+    private void ReadAndVisualizeData()
     {
         var modelText = jsonReaderService.ReadJSON(configProvider.ModelsPath);
         var spaceText = jsonReaderService.ReadJSON(configProvider.SpacePath);
 
-        modelData = matrixFillService.GetMatricesFromJSON(modelText);
-        spaceData = matrixFillService.GetMatricesFromJSON(spaceText);
+        _modelData = matrixFillService.GetMatricesFromJSON(modelText);
+        _spaceData = matrixFillService.GetMatricesFromJSON(spaceText);
 
-        modelData.VisualizeOnSceneAsModel(configProvider);
-        spaceData.VisualizeOnSceneAsSpace(configProvider);
+        _modelData.VisualizeOnSceneAsModel(configProvider);
+        _spaceData.VisualizeOnSceneAsSpace(configProvider);
     }
 
     private IEnumerator UpdateEverySecond(System.Action<MatrixData> callback = null)
     {
-        MatrixData result = modelData;
-        var firstModelMatrix = modelData.matrices[0].ToMatrix4x4();
+        MatrixData result = _modelData;
+        var firstModelMatrix = _modelData.matrices[0].ToMatrix4x4();
         var firstModelMatrixI = firstModelMatrix.inverse;
 
-        for (int i = 0; i < spaceData.matrices.Length; i++)
+        for (int i = 0; i < _spaceData.matrices.Length; i++)
         {
-            var curSpaceMatrix = spaceData.matrices[i].ToMatrix4x4();
-            var transformationMatrix = curSpaceMatrix * firstModelMatrixI;
-            var modelMatrix = configProvider.ModelParentTransform.localToWorldMatrix;
-            var resultMatrix = transformationMatrix;
+            var curSpaceMatrix = _spaceData.matrices[i].ToMatrix4x4();
+            var transformMatrix = curSpaceMatrix * firstModelMatrixI;
             UpdateTransform(configProvider.ModelParentTransform,
-                resultMatrix);
+                transformMatrix);
 
+            //var transformation matrix = 
             // Wait for 1 second if found required solution
-            yield return new WaitForSeconds(1);
+            for (int j = 0; j < _modelData.matrices.Length; j++)
+            {
+                var curModelMatrix = _modelData.matrices[j].ToMatrix4x4();
+                var multiplicationMatrix = curModelMatrix * transformMatrix;
+
+                Debug.Log($"i = {i} j = {j} \n Model matrix: \n{curModelMatrix} , " +
+                    $"Cur space matrix: \n{curSpaceMatrix} " +
+                    $"and Multiplication matrix: \n{multiplicationMatrix}");
+
+                var isEqual = _spaceData.ContainsRequiredMatrix(multiplicationMatrix);
+                if (isEqual)
+                {
+                    Debug.Log("Equal");
+                } else
+                {
+                    Debug.Log("Not Equal");
+                    break;
+                }
+            }
+            yield return new WaitForSeconds(0);
         }
 
         callback.Invoke(result);
@@ -59,23 +75,21 @@ public class FindSolution : MonoBehaviour
     private void UpdateTransform(Transform targetTransform, Matrix4x4 matrix)
     {
         Vector3 position = matrix.GetColumn(3);
-
-        Vector3 scale = new Vector3(
-            new Vector4(matrix.m00, matrix.m10, matrix.m20, matrix.m30).magnitude,
-            new Vector4(matrix.m01, matrix.m11, matrix.m21, matrix.m31).magnitude,
-            new Vector4(matrix.m02, matrix.m12, matrix.m22, matrix.m32).magnitude
-        );
-
         Quaternion rotation = Quaternion.LookRotation(
             new Vector3(matrix.m02, matrix.m12, matrix.m22),
             new Vector3(matrix.m01, matrix.m11, matrix.m21)
         );
-
         targetTransform.SetPositionAndRotation(position, rotation);
-        targetTransform.localScale = scale;
+
+        //Vector3 scale = new Vector3(
+        //    new Vector4(matrix.m00, matrix.m10, matrix.m20, matrix.m30).magnitude,
+        //    new Vector4(matrix.m01, matrix.m11, matrix.m21, matrix.m31).magnitude,
+        //    new Vector4(matrix.m02, matrix.m12, matrix.m22, matrix.m32).magnitude
+        //);
+        //targetTransform.localScale = scale;
     }
 
-    private void GenerateJSONData(MatrixData matrixData)
+    private void GenerateData(MatrixData matrixData)
     {
         matrixFillService.GetJSONFromMatrices(matrixData);
     }

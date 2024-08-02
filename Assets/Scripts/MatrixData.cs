@@ -63,4 +63,16 @@ public class MatrixData
 
         return newObject;
     }
+
+    public bool ContainsRequiredMatrix(Matrix4x4 compareMatrix)
+    {
+        foreach (var mat in matrices)
+        {
+            var matrix = mat.ToMatrix4x4();
+            if (matrix.Equals(compareMatrix))
+                return true;
+        }
+
+        return false;
+    }
 }
