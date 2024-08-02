@@ -52,6 +52,7 @@ public class FindSolution : MonoBehaviour
                 var curModelMatrix = _modelData.matrices[j].ToMatrix4x4();
                 var multiplicationMatrix = curModelMatrix * transformMatrix;
 
+                // Stuck here :(
                 Debug.Log($"i = {i} j = {j} \n Model matrix: \n{curModelMatrix} , " +
                     $"Cur space matrix: \n{curSpaceMatrix} " +
                     $"and Multiplication matrix: \n{multiplicationMatrix}");
@@ -66,7 +67,7 @@ public class FindSolution : MonoBehaviour
                     break;
                 }
             }
-            yield return new WaitForSeconds(0);
+            yield return new WaitForEndOfFrame();
         }
 
         callback.Invoke(result);
