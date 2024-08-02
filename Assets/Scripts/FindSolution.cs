@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
 
@@ -34,7 +35,7 @@ public class FindSolution : MonoBehaviour
 
     private IEnumerator UpdateEverySecond(System.Action<MatrixData> callback = null)
     {
-        MatrixData result = _modelData;
+        List<Matrix4x4Data> resultMatrices = new();
         var firstModelMatrix = _modelData.matrices[0].ToMatrix4x4();
         var firstModelMatrixI = firstModelMatrix.inverse;
 
@@ -50,26 +51,30 @@ public class FindSolution : MonoBehaviour
             for (int j = 0; j < _modelData.matrices.Length; j++)
             {
                 var curModelMatrix = _modelData.matrices[j].ToMatrix4x4();
-                var multiplicationMatrix = curModelMatrix * transformMatrix;
+                var multiplicationMatrix = transformMatrix * curModelMatrix;
+
+                //curSpaceMatrix =Matrix4x4Data.RoundMatrix(curSpaceMatrix,3);
+                //multiplicationMatrix = Matrix4x4Data.RoundMatrix(multiplicationMatrix, 3);
 
                 // Stuck here :(
-                Debug.Log($"i = {i} j = {j} \n Model matrix: \n{curModelMatrix} , " +
-                    $"Cur space matrix: \n{curSpaceMatrix} " +
-                    $"and Multiplication matrix: \n{multiplicationMatrix}");
+                //Debug.Log($"i = {i} j = {j} \n Model matrix: \n{curModelMatrix} , " +
+                //    $"Cur space matrix: \n{curSpaceMatrix} " +
+                //    $"and Multiplication matrix: \n{multiplicationMatrix}");
 
                 var isEqual = _spaceData.ContainsRequiredMatrix(multiplicationMatrix);
-                if (isEqual)
-                {
-                    Debug.Log("Equal");
-                } else
-                {
-                    Debug.Log("Not Equal");
+                if (!isEqual)
                     break;
+
+                if (j == _modelData.matrices.Length - 1)
+                {
+                    Debug.Log("Solution found!");
+                    resultMatrices.Add(new Matrix4x4Data(multiplicationMatrix));
                 }
+                yield return new WaitForSeconds(0);
             }
-            yield return new WaitForEndOfFrame();
         }
 
+        MatrixData result = new(resultMatrices);
         callback.Invoke(result);
     }
 
