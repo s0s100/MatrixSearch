@@ -42,9 +42,7 @@ public struct Matrix4x4Data
 
     public static Matrix4x4 RoundMatrix(Matrix4x4 matrix, int decimalPlaces)
     {
-        Matrix4x4 roundedMatrix = new Matrix4x4();
-
-        // Round each element of the matrix
+        Matrix4x4 roundedMatrix = new();
         roundedMatrix.m00 = RoundToDecimalPlaces(matrix.m00, decimalPlaces);
         roundedMatrix.m01 = RoundToDecimalPlaces(matrix.m01, decimalPlaces);
         roundedMatrix.m02 = RoundToDecimalPlaces(matrix.m02, decimalPlaces);
@@ -125,13 +123,13 @@ public class MatrixData
         return newObject;
     }
 
-    public bool ContainsRequiredMatrix(Matrix4x4 compareMatrix)
+    public bool ContainsRequiredMatrix(Matrix4x4 compareMatrix, int decimalLimit)
     {
-        compareMatrix = Matrix4x4Data.RoundMatrix(compareMatrix, 3);
+        compareMatrix = Matrix4x4Data.RoundMatrix(compareMatrix, decimalLimit);
         foreach (var mat in matrices)
         {
             var matrix = mat.ToMatrix4x4();
-            matrix = Matrix4x4Data.RoundMatrix(matrix, 3);
+            matrix = Matrix4x4Data.RoundMatrix(matrix, decimalLimit);
             if (matrix.Equals(compareMatrix))
                 return true;
         }

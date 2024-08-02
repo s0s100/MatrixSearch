@@ -46,22 +46,12 @@ public class FindSolution : MonoBehaviour
             UpdateTransform(configProvider.ModelParentTransform,
                 transformMatrix);
 
-            //var transformation matrix = 
-            // Wait for 1 second if found required solution
             for (int j = 0; j < _modelData.matrices.Length; j++)
             {
                 var curModelMatrix = _modelData.matrices[j].ToMatrix4x4();
                 var multiplicationMatrix = transformMatrix * curModelMatrix;
-
-                //curSpaceMatrix =Matrix4x4Data.RoundMatrix(curSpaceMatrix,3);
-                //multiplicationMatrix = Matrix4x4Data.RoundMatrix(multiplicationMatrix, 3);
-
-                // Stuck here :(
-                //Debug.Log($"i = {i} j = {j} \n Model matrix: \n{curModelMatrix} , " +
-                //    $"Cur space matrix: \n{curSpaceMatrix} " +
-                //    $"and Multiplication matrix: \n{multiplicationMatrix}");
-
-                var isEqual = _spaceData.ContainsRequiredMatrix(multiplicationMatrix);
+                var isEqual = _spaceData.ContainsRequiredMatrix(multiplicationMatrix,
+                    configProvider.DecimalLimit);
                 if (!isEqual)
                     break;
 
@@ -70,8 +60,8 @@ public class FindSolution : MonoBehaviour
                     Debug.Log("Solution found!");
                     resultMatrices.Add(new Matrix4x4Data(multiplicationMatrix));
                 }
-                yield return new WaitForSeconds(0);
             }
+            yield return new WaitForSeconds(0);
         }
 
         MatrixData result = new(resultMatrices);
@@ -86,13 +76,6 @@ public class FindSolution : MonoBehaviour
             new Vector3(matrix.m01, matrix.m11, matrix.m21)
         );
         targetTransform.SetPositionAndRotation(position, rotation);
-
-        //Vector3 scale = new Vector3(
-        //    new Vector4(matrix.m00, matrix.m10, matrix.m20, matrix.m30).magnitude,
-        //    new Vector4(matrix.m01, matrix.m11, matrix.m21, matrix.m31).magnitude,
-        //    new Vector4(matrix.m02, matrix.m12, matrix.m22, matrix.m32).magnitude
-        //);
-        //targetTransform.localScale = scale;
     }
 
     private void GenerateData(MatrixData matrixData)

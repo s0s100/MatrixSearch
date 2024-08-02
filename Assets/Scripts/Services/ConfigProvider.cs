@@ -10,6 +10,7 @@ public class ConfigProvider : MonoBehaviour
     [SerializeField] private Transform spaceParentTransform;
     [SerializeField] private Material defaultMaterial;
     [SerializeField] private Material selectedMaterial;
+    [SerializeField] private int decimalLimit;
 
     public string ModelsPath => modelsPath;
     public string SpacePath => spacePath;
@@ -18,4 +19,5 @@ public class ConfigProvider : MonoBehaviour
     public Transform SpaceParentTransform => spaceParentTransform;
     public Material DefaultMaterial => defaultMaterial;
     public Material SelectedMaterial => selectedMaterial;
+    public int DecimalLimit => decimalLimit;
 }

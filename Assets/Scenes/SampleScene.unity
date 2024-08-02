@@ -189,6 +189,7 @@ MonoBehaviour:
   spaceParentTransform: {fileID: 1976438333}
   defaultMaterial: {fileID: 2100000, guid: 53a97cb8f1d4b714cadbc1968a737d2d, type: 2}
   selectedMaterial: {fileID: 2100000, guid: 5f45f7256a94470408613b2a91104323, type: 2}
+  decimalLimit: 3
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
